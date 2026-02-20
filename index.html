@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deva's paradise</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--primary:#ff512f;
+--secondary:#dd2476;
+--bg:#f5f6fa;
+--card:#ffffff;
+--text:#222;
+}
+
+.dark{
+--bg:#121212;
+--card:#1e1e1e;
+--text:#f1f1f1;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:var(--bg);color:var(--text);transition:0.3s;}
+
+.page{display:none;padding-bottom:90px;}
+.active{display:block;}
+
+header{
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+color:white;
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-weight:bold;
+}
+
+/* LOGIN */
+.login-container{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#ff512f,#dd2476);
+}
+
+.login-box{
+background:white;
+padding:40px;
+border-radius:15px;
+width:300px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+.login-box input{
+width:100%;
+padding:10px;
+margin:10px 0;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+/* FOOD GRID (4 per row desktop) */
+.food-container{
+display:grid;
+grid-template-columns:repeat(4, 1fr);
+gap:20px;
+padding:20px;
+}
+
+@media(max-width:1024px){
+.food-container{
+grid-template-columns:repeat(2, 1fr);
+}
+}
+
+@media(max-width:600px){
+.food-container{
+grid-template-columns:repeat(1, 1fr);
+}
+}
+
+.food-card{
+background:var(--card);
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+transition:0.3s;
+animation:fadeIn 0.5s ease;
+}
+
+.food-card:hover{
+transform:translateY(-8px);
+box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+
+.food-card img{
+width:100%;
+height:150px;
+object-fit:cover;
+}
+
+.food-content{
+padding:15px;
+text-align:center;
+}
+
+.price{color:var(--secondary);font-weight:bold;}
+.rating{color:gold;font-size:14px;margin:5px 0;}
+
+button{
+padding:8px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+color:white;
+margin-top:5px;
+font-weight:600;
+}
+
+button:hover{opacity:0.9;}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+/* CART */
+.cart-item{
+background:var(--card);
+margin:10px;
+padding:10px;
+border-radius:10px;
+display:flex;
+justify-content:space-between;
+}
+
+/* SUCCESS */
+.success{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+background:linear-gradient(135deg,#28a745,#20c997);
+color:white;
+text-align:center;
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+position:fixed;
+bottom:0;
+width:100%;
+background:var(--card);
+display:flex;
+justify-content:space-around;
+padding:10px 0;
+box-shadow:0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.bottom-nav button{
+background:none;
+color:var(--primary);
+font-size:20px;
+position:relative;
+}
+
+/* Cart badge */
+.badge{
+position:absolute;
+top:-5px;
+right:-10px;
+background:red;
+color:white;
+border-radius:50%;
+font-size:12px;
+padding:2px 6px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="page active" id="loginPage">
+<div class="login-container">
+<div class="login-box">
+<h2>Login</h2>
+<input type="text" id="username" placeholder="Enter your name">
+<button onclick="login()">Login</button>
+</div>
+</div>
+</div>
+
+<!-- HOME -->
+<div class="page" id="homePage">
+<header>
+<span>🍽 Deva's Paradise</span>
+<div>
+<button onclick="toggleDark()">🌙</button>
+<button onclick="logout()">Logout</button>
+</div>
+</header>
+
+<div class="food-container" id="menu"></div>
+</div>
+
+<!-- CART -->
+<div class="page" id="cartPage">
+<header>🛒 Cart</header>
+<div id="cartItems"></div>
+<div style="padding:15px;">
+<h3>Total: ₹<span id="total">0</span></h3>
+<button onclick="showPage('addressPage')">Proceed</button>
+</div>
+</div>
+
+<!-- ADDRESS -->
+<div class="page" id="addressPage">
+<header>📍 Address</header>
+<div style="padding:15px;">
+<input type="text" placeholder="Full Address">
+<input type="text" placeholder="City">
+<input type="text" placeholder="Pincode">
+<button onclick="showPage('paymentPage')">Continue</button>
+</div>
+</div>
+
+<!-- PAYMENT -->
+<div class="page" id="paymentPage">
+<header>💳 Payment</header>
+<div style="padding:15px;">
+<input type="text" placeholder="Card Number">
+<input type="text" placeholder="Expiry Date">
+<input type="text" placeholder="CVV">
+<button onclick="placeOrder()">Pay Now</button>
+</div>
+</div>
+
+<!-- SUCCESS -->
+<div class="page" id="successPage">
+<div class="success">
+<h1>🎉 Order Confirmed!</h1>
+<p>Your food is on the way 🚀</p>
+<button onclick="goHome()">Back Home</button>
+</div>
+</div>
+
+<!-- NAV -->
+<div class="bottom-nav">
+<button onclick="showPage('homePage')">🏠</button>
+<button onclick="showPage('cartPage')">
+🛒
+<span class="badge" id="cartCount">0</span>
+</button>
+</div>
+
+<script>
+
+let foods=[
+{name:"Burger",price:120,img:"burger.png",rating:""},
+{name:"Pizza",price:250,img:"pizza.png",rating:""},
+{name:"Chicken Biryani",price:220,img:"chicken biriyani.png",rating:"⭐⭐⭐⭐"},
+{name:"Mutton Biryani",price:280,img:"mutton biriyani.png",rating:"⭐⭐⭐⭐⭐"},
+{name:"Noodles",price:150,img:"noddles.png",rating:"⭐⭐⭐⭐"},
+{name:"Fried Rice",price:160,img:"fried rice.png",rating:"⭐⭐⭐⭐"},
+{name:"Sandwich",price:100,img:"sandwidch.png",rating:"⭐⭐⭐⭐"},
+{name:"French Fries",price:90,img:"french fries.png",rating:"⭐⭐⭐⭐"}
+];
+
+let cart=[];
+
+function login(){
+let name=document.getElementById("username").value;
+if(name){
+showPage("homePage");
+loadMenu();
+}
+}
+
+function logout(){
+cart=[];
+updateCart();
+showPage("loginPage");
+}
+
+function showPage(id){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+updateCart();
+}
+
+function loadMenu(){
+let menu=document.getElementById("menu");
+menu.innerHTML="";
+foods.forEach(food=>{
+menu.innerHTML+=`
+<div class="food-card">
+<img src="${food.img}">
+<div class="food-content">
+<h4>${food.name}</h4>
+<p class="rating">${food.rating}</p>
+<p class="price">₹${food.price}</p>
+<button onclick="addToCart('${food.name}',${food.price})">Add</button>
+</div>
+</div>`;
+});
+}
+
+function addToCart(name,price){
+cart.push({name,price});
+updateCart();
+}
+
+function updateCart(){
+let cartDiv=document.getElementById("cartItems");
+let total=0;
+cartDiv.innerHTML="";
+cart.forEach(item=>{
+total+=item.price;
+cartDiv.innerHTML+=`
+<div class="cart-item">
+<span>${item.name}</span>
+<span>₹${item.price}</span>
+</div>`;
+});
+document.getElementById("total").innerText=total;
+document.getElementById("cartCount").innerText=cart.length;
+}
+
+function placeOrder(){
+cart=[];
+updateCart();
+showPage("successPage");
+}
+
+function goHome(){
+showPage("homePage");
+}
+
+function toggleDark(){
+document.body.classList.toggle("dark");
+}
+
+</script>
+
+</body>
+</html>
